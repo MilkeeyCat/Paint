@@ -1,17 +1,25 @@
 body {
     margin: 0;
     padding: 0;
+    overflow: hidden;
 }
 canvas {
     display: block;
 }
-#editMenu {
-    max-width: 300px;
+#penMenu {
+    max-width: 250px;
     width: 100%;
-    min-height: 200px;
-    background: #353131;
+    background: #835b5b;
     position: absolute;
     top: 0;
     left: 0;
+    flex-direction: column;
     display: none;
+}
+#penMenu section:first-child {
+    display: flex;
+    align-items: center;
+}
+#penMenu section:first-child svg {
+    margin: 0 10px;
 }

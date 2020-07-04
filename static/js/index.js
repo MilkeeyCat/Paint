@@ -1,8 +1,8 @@
 const canv = document.querySelector("#canvas");
 const ctx = canv.getContext("2d");
 let isMouseClicked = false;
-const color = "#f01";
-const lineWidth = 50;
+let color = "#000";
+let lineWidth = 50;
 let coords = [];
 
 canv.width = window.innerWidth;
@@ -22,12 +22,13 @@ canv.onmouseup = () => {
 }
 canv.addEventListener("mousemove", function(e) {
     if(isMouseClicked) {
-        coords.push([e.clientX, e.clientY]);
+        coords.push([e.clientX, e.clientY, ctx.fillStyle]);
         ctx.lineTo(e.clientX, e.clientY);
         ctx.stroke();
         
         ctx.beginPath();
         ctx.arc(e.clientX, e.clientY, lineWidth / 2, 0, Math.PI * 2);
+        // ctx.arc(e.clientX, e.clientY, lineWidth / 2, 0, Math.PI * 2);
         ctx.fill();
         
         ctx.beginPath();
@@ -50,7 +51,7 @@ const save = () => {
 
 const replay = () => {
     const crds = JSON.parse(localStorage.getItem("coords"));
-
+    
     const handler = setInterval(() => {
         if(!crds.length) {
             clearInterval(handler);
@@ -62,7 +63,11 @@ const replay = () => {
             clientX: crd[0],
             clientY: crd[1]
         };  
+        const color = crd[2];
 
+        ctx.fillStyle = color;
+        ctx.strokeStyle = color;
+        
         ctx.lineTo(e.clientX, e.clientY);
         ctx.stroke();
         
@@ -72,7 +77,7 @@ const replay = () => {
         
         ctx.beginPath();
         ctx.moveTo(e.clientX, e.clientY);
-
+        
     }, 30);
 }
 
@@ -84,11 +89,47 @@ document.addEventListener("keydown", (e) => {
     } else if(e.key == "r") {
         clear();
         replay();
-    } else if(e.ctrlKey) {
-        document.addEventListener("contextmenu", (e) => {
-            e.preventDefault();
-            const editMenu = document.querySelector("#editMenu");
-            editMenu.style.display = "block";
-        });
+    }
+});
+document.addEventListener("contextmenu", () => {
+    window.event.preventDefault();
+    const editMenu = document.querySelector("#penMenu");
+    const input = editMenu.querySelector("input[type='range']");
+    const svgCircle = editMenu.querySelector("svg > circle");
+    const colorValue = editMenu.querySelector(".hex > input[type='text']");
+    let mouseDown = false;
+    
+    editMenu.onmousedown = () => {
+        color = colorValue.value;
+        console.log(color);
+        svgCircle.setAttribute("fill", color);
+        editMenu.onmousemove = () => {
+            color = colorValue.value;
+            svgCircle.setAttribute("fill", color);
+            ctx.fillStyle = color;
+            ctx.strokeStyle = color;    
+        }   
+    }
+    
+    editMenu.onmouseup = () => {
+        mouseDown = false;
+    }
+    
+    svgCircle.setAttribute("r", lineWidth/2);
+    
+    input.oninput = (e) => {
+        lineWidth = input.value;
+        svgCircle.setAttribute("r", lineWidth/2);
+        ctx.lineWidth = lineWidth;
+    }
+    
+    editMenu.style.top = window.event.clientY + "px";
+    editMenu.style.left = window.event.clientX + "px";
+    editMenu.style.display = "flex";
+    
+    this.onmousedown =  function(e){
+        if(e.target != editMenu && !editMenu.contains(e.target)) {
+            editMenu.style.display = "none";
+        }
     }
 });
